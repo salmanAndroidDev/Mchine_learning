@@ -4,17 +4,34 @@ const _ = require('lodash');
 class LinearRegrassion{
     // passino features and labels arguments must be instances of Tensor Object;
     constructor(features, labels, options) {
-        this.features = features;
-        this.labels = labels;
+        this.features = tf.tensor(features);
+        this.labels = tf.tensor(labels);
+        
+        this.features=  tf.ones([this.features.shape[0], 1]).concat(features,1)
+        
         // this will assign default values for options, if we don't specify options param
         //else it will copy options object into instance variable;
         this.options = Object.assign({learningRate: 1.5, iterations: 1000}, options);
         // by convention it's better to initial m and b with 0 or 1;
-        this.m = 0;
-        this.b = 0;
+  
+        this.weight = tf.zeros([2,1]);
     }
 
-    gradientDecent(){
+    gradientDecent() {
+        const currentGuesses = this.features.matMul(this.weight)
+        const differences = currentGuesses.sub(this.labels);
+        
+        const slopes = this.features
+                .transpose()
+                .matMul(differences)
+                .div(this.features.shape[0])   
+                // .mul(2)// i should test this thing to see the result.
+
+       this.weight =  this.weight.sub(slopes.mul(this.options.learningRate));
+
+    }
+
+    gradientDecentOldVersion(){
         const currentGuessesForMPG = this.features.map(row => {
             return this.m * row[0] + this.b;
         });
@@ -33,14 +50,11 @@ class LinearRegrassion{
     
     }
 
-
     train() {
         for(let i = 0; i < this.options.iterations; i++){
             this.gradientDecent();
         }
-    }
-    
+    }    
 }
-
 
 module.exports = LinearRegrassion;
