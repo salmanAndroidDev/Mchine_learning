@@ -19,5 +19,5 @@ const regression = new linearRegression(features, labels, {
 })
 
 regression.train()
-
-console.log('m: ', regression.weight.get(1,0), " b: ", regression.weight.get(0,0))
+regression.test(testFeatures, testLabels);
+// console.log('m: ', regression.weight.get(1,0), " b: ", regression.weight.get(0,0))
