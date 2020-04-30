@@ -14,10 +14,11 @@ let {features, labels, testFeatures, testLabels} = loadCSV('./cars.csv', {
 
 
 const regression = new linearRegression(features, labels, {
-    learningRate: 0.0001,
+    learningRate: 0.01,
     iterations: 100
 })
 
 regression.train()
-regression.test(testFeatures, testLabels);
-// console.log('m: ', regression.weight.get(1,0), " b: ", regression.weight.get(0,0))
+//const r2 = regression.test(testFeatures, testLabels);
+
+regression.predict([[95]]).print();

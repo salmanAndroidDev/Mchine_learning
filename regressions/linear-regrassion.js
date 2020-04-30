@@ -4,11 +4,10 @@ const _ = require('lodash');
 class LinearRegrassion{
     // passino features and labels arguments must be instances of Tensor Object;
     constructor(features, labels, options) {
-        this.features = tf.tensor(features);
+        const {mean, variance} = tf.moments(features);
+        this.features = this.processFeatures(features);
         this.labels = tf.tensor(labels);
-        
-        this.features=  tf.ones([this.features.shape[0], 1]).concat(features,1)
-        
+                
         // this will assign default values for options, if we don't specify options param
         //else it will copy options object into instance variable;
         this.options = Object.assign({learningRate: 1.5, iterations: 1000}, options);
@@ -57,15 +56,52 @@ class LinearRegrassion{
     }    
 
     test(testFeatures, testLabels) {
-         testFeatures = tf.tensor(testFeatures);
+         testFeatures = this.processFeatures(testFeatures);
          testLabels = tf.tensor(testLabels);
          
-        testFeatures=  tf.ones([testFeatures.shape[0], 1]).concat(testFeatures,1)
-
         const predictions = testFeatures.matMul(this.weight);
 
-        predictions.print();
+        const res = testLabels.sub(predictions)
+                    .pow(2)
+                    .sum()
+                    .get();
+
+        const tot = testLabels.sub(testLabels.mean())
+                        .pow(2)
+                        .sum()
+                        .get();
+        
+        return 1 - res / tot;                
     }
+
+    processFeatures(features){
+        features = tf.tensor(features);
+
+        if(this.mean && this.variance){
+            features = features.sub(this.mean).div(this.variance.pow(0.5));
+        } else {
+            features = this.standardize(features);
+        }
+
+        features = tf.ones([features.shape[0], 1]).concat(features,1)    
+
+        return features;
+    }
+
+    standardize(features) {
+        const {mean, variance} = tf.moments(features, 0);
+
+        this.mean = mean;
+        this.variance = variance;
+        
+        return features.sub(mean).div(variance.pow(0.5));
+    }
+
+    predict(features){
+        features = this.processFeatures(features);
+        return features.matMul(this.weight);
+    }
+
 }
 
 module.exports = LinearRegrassion;
