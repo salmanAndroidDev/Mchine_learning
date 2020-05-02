@@ -13,7 +13,7 @@ class LinearRegrassion{
         this.options = Object.assign({learningRate: 1.5, iterations: 1000}, options);
         // by convention it's better to initial m and b with 0 or 1;
   
-        this.weight = tf.zeros([2,1]);
+        this.weight = tf.zeros([this.features.shape[1],1]);
     }
 
     gradientDecent() {

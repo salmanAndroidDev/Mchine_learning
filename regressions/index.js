@@ -8,17 +8,17 @@ const linearRegression = require('./linear-regrassion');
 let {features, labels, testFeatures, testLabels} = loadCSV('./cars.csv', {
     shuffle: true,
     splitTest: 50,
-    dataColumns: ['horsepower'],
+    dataColumns: ['horsepower', 'displacement', 'weight'],
     labelColumns: ['mpg']
 });
 
 
 const regression = new linearRegression(features, labels, {
-    learningRate: 0.01,
+    learningRate: 0.09,
     iterations: 100
 })
 
 regression.train()
-//const r2 = regression.test(testFeatures, testLabels);
+const r2 = regression.test(testFeatures, testLabels);
 
-regression.predict([[95]]).print();
+console.log("Result: ", r2);
