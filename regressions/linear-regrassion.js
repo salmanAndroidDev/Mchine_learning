@@ -7,13 +7,15 @@ class LinearRegrassion{
         const {mean, variance} = tf.moments(features);
         this.features = this.processFeatures(features);
         this.labels = tf.tensor(labels);
-                
+        this.mseHistory = [];
+        this.bHistory = [];        
         // this will assign default values for options, if we don't specify options param
         //else it will copy options object into instance variable;
         this.options = Object.assign({learningRate: 1.5, iterations: 1000}, options);
         // by convention it's better to initial m and b with 0 or 1;
   
         this.weight = tf.zeros([this.features.shape[1],1]);
+
     }
 
     gradientDecent() {
@@ -51,7 +53,10 @@ class LinearRegrassion{
 
     train() {
         for(let i = 0; i < this.options.iterations; i++){
+            this.bHistory.push(this.weight.get(0,0));
             this.gradientDecent();
+            this.recordMSE();
+            this.updateLearningRate();
         }
     }    
 
@@ -101,6 +106,34 @@ class LinearRegrassion{
         features = this.processFeatures(features);
         return features.matMul(this.weight);
     }
+
+    recordMSE() {
+        const mse = this.features.matMul(this.weight)
+            .sub(this.labels)
+            .pow(2)
+            .sum()
+            .div(this.features.shape[0])
+            .get();
+    
+            // unshift will make order from new to old rather than from old to new;
+        this.mseHistory.unshift(mse);
+        }
+
+    updateLearningRate() {
+
+        if(this.mseHistory.length < 2)
+            return;
+
+            // [0] is newer one;
+        if(this.mseHistory[0] > this.mseHistory[1]){
+            this.options.learningRate /= 2;
+        }else { // it'll increase learningRate by 5%
+            this.options.learningRate *= 1.05;
+        }
+
+
+    }
+        
 
 }
 
