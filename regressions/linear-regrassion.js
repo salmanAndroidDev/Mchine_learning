@@ -18,18 +18,17 @@ class LinearRegrassion{
 
     }
 
-    gradientDecent() {
-        const currentGuesses = this.features.matMul(this.weight)
-        const differences = currentGuesses.sub(this.labels);
+    gradientDecent(features, labels) {
+        const currentGuesses = features.matMul(this.weight)
+        const differences = currentGuesses.sub(labels);
         
-        const slopes = this.features
+        const slopes = features
                 .transpose()
                 .matMul(differences)
-                .div(this.features.shape[0])   
+                .div(features.shape[0])   
                 // .mul(2)// i should test this thing to see the result.
 
        this.weight =  this.weight.sub(slopes.mul(this.options.learningRate));
-
     }
 
     gradientDecentOldVersion(){
@@ -52,9 +51,28 @@ class LinearRegrassion{
     }
 
     train() {
+
+        const batchQuantity = Math.floor(
+             this.features.shape[0] / this.options.batchSize
+        );
+            
         for(let i = 0; i < this.options.iterations; i++){
-            this.bHistory.push(this.weight.get(0,0));
-            this.gradientDecent();
+            for(let j = 0; j < batchQuantity; j++){
+                const {batchSize} = this.options;
+                const startIndex = j * batchSize;
+                
+                // it slices the entire features into batches
+                const featureSlice = this.features.slice(
+                    [startIndex, 0],    // starts at [startIndex, 0 column]
+                    [batchSize, -1]);    // we wanna take batchSize record and -1 means entire features
+
+                const labelSlice = this.labels.slice(
+                    [startIndex, 0],
+                    [batchSize, -1]);
+
+                this.gradientDecent(featureSlice, labelSlice);
+            }
+            
             this.recordMSE();
             this.updateLearningRate();
         }
@@ -81,7 +99,7 @@ class LinearRegrassion{
 
     processFeatures(features){
         features = tf.tensor(features);
-
+        console.log(features.shape)
         if(this.mean && this.variance){
             features = features.sub(this.mean).div(this.variance.pow(0.5));
         } else {
@@ -103,8 +121,7 @@ class LinearRegrassion{
     }
 
     predict(features){
-        features = this.processFeatures(features);
-        return features.matMul(this.weight);
+        return this.processFeatures(features).matMul(this.weight);
     }
 
     recordMSE() {
@@ -130,11 +147,7 @@ class LinearRegrassion{
         }else { // it'll increase learningRate by 5%
             this.options.learningRate *= 1.05;
         }
-
-
     }
-        
-
 }
 
 module.exports = LinearRegrassion;

@@ -13,21 +13,21 @@ let {features, labels, testFeatures, testLabels} = loadCSV('./cars.csv', {
     labelColumns: ['mpg']
 });
 
-
 const regression = new linearRegression(features, labels, {
-    learningRate: 10,
-    iterations: 100
+    learningRate: 0.1,
+    iterations: 3,
+    batchSize: 10
 })
 
 regression.train()
 const r2 = regression.test(testFeatures, testLabels);
 
-plot({
-    y: regression.bHistory,
-    x: regression.mseHistory,
-    xLabel: 'Iteration #',
-    yLabel: 'Mean Squred Error'
-});
+// plot({
+//     x: regression.mseHistory,
+//     xLabel: 'Iteration #',
+//     yLabel: 'Mean Squred Error'
+// });
 
 
-console.log("Result: ", r2);
+console.log("Result: ", r2, ' learningRate: ', regression.options.learningRate);
+regression.predict([[82, 119, 1.36],]).print();
