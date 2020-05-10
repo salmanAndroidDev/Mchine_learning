@@ -18,7 +18,6 @@ class LogisticRegression {
   gradientDescent(features, labels) {
     const currentGuesses = features.matMul(this.weights).softmax();
     const differences = currentGuesses.sub(labels);
-
     const slopes = features
       .transpose()
       .matMul(differences)
@@ -71,7 +70,7 @@ class LogisticRegression {
   processFeatures(features) {
     features = tf.tensor(features);
     features = tf.ones([features.shape[0], 1]).concat(features, 1);
-
+    debugger
     if (this.mean && this.variance) {
       features = features.sub(this.mean).div(this.variance.pow(0.5));
     } else {
@@ -84,10 +83,13 @@ class LogisticRegression {
   standardize(features) {
     const { mean, variance } = tf.moments(features, 0);
 
-    this.mean = mean;
-    this.variance = variance;
+    const filler = variance.cast('bool').logicalNot().cast('float32');
 
-    return features.sub(mean).div(variance.pow(0.5));
+    this.mean = mean;
+    // nice trick; this will add 1 to all zeros and 0 to all none zeros;
+    this.variance = variance.add(filler);
+
+    return features.sub(mean).div(this.variance.pow(0.5));
   }
 
   recordCost() {
