@@ -13,7 +13,7 @@ raw_data = [
     'not good actually it is bad and terrible and bullshit',
     'amazing idea with the best',
     'bullshit and terible and bad',
-    'it is super good and the best',
+    'it is super good and the',
     'what the fuck with this bad and bullshit and terrible idea',
     'it got a git golden buzzar for this nice and good and amazing idea',
     'not that much bad, actually it is good',
@@ -56,7 +56,8 @@ weights_0_1 = 0.2*np.random.random((len(vocabs),hidden_size)) - 0.1
 weights_1_2 = 0.2*np.random.random((hidden_size,1)) - 0.1
 
 total, best_rond = (0,0)
-
+best_weight_0_1 = weights_0_1
+best_weight_1_2 = weights_1_2
 for iter in range(iteration):
     correct= 0
     for i in range(len(input_dataset)):
@@ -79,9 +80,14 @@ for iter in range(iteration):
     if correct > total:
         total = correct
         best_rond = iter
+        # initializing the weight
+        best_weight_0_1 = weights_0_1
+        best_weight_1_2 = weights_1_2
     print("Best iteration is: ", best_rond,' Acuraccy: ', (total/ len(label_data)) * 100,'%', ' current ', iter)
-    if iter >= 66: break
+    
 
+weights_0_1 = best_weight_0_1
+weights_1_2 = best_weight_1_2
 while(True):
     sentence = input("Enter the sentence: ")
 
