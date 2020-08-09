@@ -1,8 +1,7 @@
 import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
 # Setting the random seed, feel free to change it and see different solutions.
 np.random.seed(42)
+
 def stepFunction(t):
     if t >= 0:
         return 1
@@ -18,23 +17,8 @@ def prediction(X, W, b):
 # and return W and b.
 def perceptronStep(X, y, W, b, learn_rate = 0.01):
     # Fill in code
-    for i in range(len(X)):
-         y_hat = prediction(X[i],W,b)
-         if y[i]- y_hat == 1:
-             W[0] += x[i][0] * learn_rate
-             w[1] += x[i][1] * learn_rate
-             b += learn_rate
-
-         elif y_hat- y[i] == -1:
-             W[0] -= x[i][0] * learn_rate
-             w[1] -= x[i][1] * learn_rate
-             b    -= learn_rate
-
     return W, b
-
-
-
-# here is for running my code
+    
 # This function runs the perceptron algorithm repeatedly on the dataset,
 # and returns a few of the boundary lines obtained in the iterations,
 # for plotting purposes.
@@ -51,21 +35,5 @@ def trainPerceptronAlgorithm(X, y, learn_rate = 0.01, num_epochs = 25):
         # In each epoch, we apply the perceptron step.
         W, b = perceptronStep(X, y, W, b, learn_rate)
         boundary_lines.append((-W[0]/W[1], -b/W[1]))
-    
-    return (W,b)
+    return boundary_lines
 
-data = pd.read_csv('data.csv').values
-features = data[:,:2]
-labels =   data[:,2:]
-
-result = trainPerceptronAlgorithm(features, labels)
-W = result[0]
-b = result[1]
-
-total = []
-for i in range(len(features)):
-    
-    
-    check = prediction(features[i], W, b)
-    total.append(prediction == labels[i])
-plt.scatter(data= features, x= features[:,0], y= features[:,1])

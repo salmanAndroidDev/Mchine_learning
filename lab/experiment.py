@@ -1,111 +1,82 @@
 import numpy as np
-np.random.seed(1)
+# Setting the random seed, feel free to change it and see different solutions.
+np.random.seed(42)
 
-def sigmoid(x):
-    return 1/ (1 + np.exp(-x))
+w = np.random.random((2))
+b = 1
+lr = 0.1
 
-raw_data = [
-    'so terrible dont buy',
-    'terrible and bad and bullshit',
-    'bad idea behind this game',
-    'good idea behind this game',
-    'not bad actually it is good and amazing',
-    'not good actually it is bad and terrible and bullshit',
-    'amazing idea with the best',
-    'bullshit and terible and bad',
-    'it is super good and the',
-    'what the fuck with this bad and bullshit and terrible idea',
-    'it got a git golden buzzar for this nice and good and amazing idea',
-    'not that much bad, actually it is good',
-    'not good at all, actually it is bad never buy it',
-    'amazing idea it worth buying its so good so clever so amazing'
-]
+def stepFunction(t):
+    if t >= 0:
+        return 1
+    return 0
 
-label_data = np.array([0,0,0,1,1,0,1,0,0,0,1,1,0,1])
+def prediction(X, W, b):
+    return stepFunction((np.matmul(X,W)+b))
 
-token = list(map(lambda sentence: set(sentence.split(' ')) ,raw_data))
-
-vocabs = set()
-
-for sent in token:
-    for word in sent:
-        if len(word) > 0:
-            vocabs.add(word)
-vocabs = list(vocabs)
-
-word2index = {}
-
-for index, word in enumerate(vocabs):
-    word2index[word]= index
-
-input_dataset = list()
-
-for sent in token:
-    raw_sent = list()
-    for word in sent:
-        try:
-            raw_sent.append(word2index[word])
-        except e:
-            ""    
-    input_dataset.append(list(set(raw_sent)))
-
-alpha, iteration = (0.1, 300)
-hidden_size = 3
-
-weights_0_1 = 0.2*np.random.random((len(vocabs),hidden_size)) - 0.1
-weights_1_2 = 0.2*np.random.random((hidden_size,1)) - 0.1
-
-total, best_rond = (0,0)
-best_weight_0_1 = weights_0_1
-best_weight_1_2 = weights_1_2
-for iter in range(iteration):
-    correct= 0
-    for i in range(len(input_dataset)):
+def test(x,y):
+    sum = 0
+    for i in range(len(y)):
+        pred = prediction(x[i],w,b)
         
-        x = input_dataset[i]
-        y = label_data[i]
+        if pred == y[i]:
+            sum += 1
+    return (sum / len(y)) * 100        
 
-        layer_1 = sigmoid(np.sum(weights_0_1[x], axis= 0))
-        layer_2 = sigmoid(np.dot(layer_1, weights_1_2))
-        
-        layer_2_delta = layer_2 - y
-        layer_1_delta = layer_2_delta.dot(weights_1_2.T)
-
-        weights_0_1[x] -= layer_1_delta * alpha 
-        weights_1_2 -= np.outer(layer_1,layer_2_delta) * alpha
-
-        if (np.abs(layer_2_delta) < 0.5):
-            correct += 1
-
-    if correct > total:
-        total = correct
-        best_rond = iter
-        # initializing the weight
-        best_weight_0_1 = weights_0_1
-        best_weight_1_2 = weights_1_2
-    print("Best iteration is: ", best_rond,' Acuraccy: ', (total/ len(label_data)) * 100,'%', ' current ', iter)
+# TODO: Fill in the code below to implement the perceptron trick.
+# The function should receive as inputs the data X, the labels y,
+# the weights W (as an array), and the bias b,
+# update the weights and bias W, b, according to the perceptron algorithm,
+# and return W and b.
+def perceptronStep(X, y, W, b, learn_rate = 0.01):
+    # Fill in code
     
-
-weights_0_1 = best_weight_0_1
-weights_1_2 = best_weight_1_2
-while(True):
-    sentence = input("Enter the sentence: ")
-
-    if sentence  == 'q':
-        break
-    else:
-        sent = sentence.split(' ')
-        raw_sentence = list()
-        for word in sent:
-            try:
-                raw_sentence.append(word2index[word])
-            except e:
-                ""   
-        x = list(set(raw_sentence))
-
-        layer_1 = sigmoid(np.sum(weights_0_1[x], axis= 0))
-        layer_2 = sigmoid(np.dot(layer_1, weights_1_2))
+    for i in range(len(X)):
+        y_hat = prediction(X[i],W,b)
+                
+        if y_hat < y[i]:
+            W += X[i] * learn_rate
+            b += learn_rate
+        elif y_hat > y[i]:
+            W -= X[i] * learn_rate
+            b -= learn_rate
             
-        message = "prediction:{} weight: {}".format(layer_2, weights_0_1[x])
-        
-        print(message)
+# This function runs the perceptron algorithm repeatedly on the dataset,
+# and returns a few of the boundary lines obtained in the iterations,
+# for plotting purposes.
+# Feel free to play with the learning rate and the num_epochs,
+# and see your results plotted below.
+def trainPerceptronAlgorithm(X, y, learn_rate = 0.01, num_epochs = 25):
+    x_min, x_max = min(X.T[0]), max(X.T[0])
+    y_min, y_max = min(X.T[1]), max(X.T[1])
+    W = np.array(np.random.rand(2,1))
+    b = np.random.rand(1)[0] + x_max
+    # These are the solution lines that get plotted below.
+    boundary_lines = []
+    for i in range(num_epochs):
+        # In each epoch, we apply the perceptron step.
+        W, b = perceptronStep(X, y, W, b, learn_rate)
+        boundary_lines.append((-W[0]/W[1], -b/W[1]))
+    return boundary_lines
+
+#// here we start testing
+file = open('data.csv','r')
+raw_data = file.readlines()
+file.close()
+
+input = []
+label = []
+
+for data in raw_data:
+    x1,x2,y = data.split(',')
+    input.append([float(x1),float(x2)])
+    label.append(int(y))
+
+
+input = np.array(input)
+
+for i in range(10):
+    perceptronStep(input,label,w,b,lr)
+    print(test(input,label))
+
+# print(trainPerceptronAlgorithm(input,y))
