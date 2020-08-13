@@ -11,8 +11,8 @@ def sigmoid(x):
 #       the previous lesson to encourage you to come up with a more
 #       efficient solution. If you need a hint, check out the comments
 #       in solution.py from the previous lecture.
-
 # Use to same seed to make debugging easier
+
 np.random.seed(42)
 
 n_records, n_features = features.shape
@@ -20,7 +20,6 @@ last_loss = None
 
 # Initialize weights
 weights = np.random.normal(scale=1 / n_features**.5, size=n_features)
-
 # Neural Network hyperparameters
 epochs = 1000
 learnrate = 0.5
@@ -35,20 +34,20 @@ for e in range(epochs):
         #       the h together with the output
 
         # TODO: Calculate the output
-        output = None
+        output = sigmoid(np.dot(x,weights))
 
         # TODO: Calculate the error
-        error = None
+        error = (y - output)
 
         # TODO: Calculate the error term
-        error_term = None
+        error_term = error * output * (1- output)
 
         # TODO: Calculate the change in weights for this sample
         #       and add it to the total weight change
-        del_w += 0
+        del_w += error_term * x
 
     # TODO: Update weights using the learning rate and the average change in weights
-    weights += 0
+    weights += learnrate * del_w / n_records
 
     # Printing out the mean square error on the training set
     if e % (epochs / 10) == 0:
